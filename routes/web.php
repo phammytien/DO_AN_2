@@ -33,6 +33,17 @@ use App\Http\Controllers\SinhVien\DiemController;
 use App\Http\Controllers\SinhVien\ThongBaoController as SVThongBaoController;
 use App\Http\Controllers\SinhVien\ProfileController;
 
+
+Route::get('/check', function () {
+    try {
+        // Test DB
+        DB::connection()->getPdo();
+        return "DB OK — No issue with database.";
+    } catch (\Exception $e) {
+        return "DB ERROR: " . $e->getMessage();
+    }
+});
+
 // ===================== TRANG WELCOME =====================
 Route::get('/', fn() => view('welcome'))->name('home');
 
