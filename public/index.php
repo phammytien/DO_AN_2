@@ -1,36 +1,42 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
-/*
-|--------------------------------------------------------------------------
-| Check If The Application Is Under Maintenance
-|--------------------------------------------------------------------------
-*/
+// ERROR LOG SETUP
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+ini_set('error_log', '/var/log/apache2/error.log');
+
+set_exception_handler(function ($e) {
+    error_log("UNCAUGHT EXCEPTION: " . $e->getMessage());
+    error_log($e->getTraceAsString());
+    http_response_code(500);
+    echo "Server Error";
+});
+
+set_error_handler(function ($severity, $message, $file, $line) {
+    error_log("PHP ERROR: [$severity] $message in $file on line $line");
+    return false;
+});
+
+// Maintenance mode
 if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
     require $maintenance;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Register The Composer Auto Loader
-|--------------------------------------------------------------------------
-*/
+// Autoload
 require __DIR__.'/../vendor/autoload.php';
 
-/*
-|--------------------------------------------------------------------------
-| Run The Application
-|--------------------------------------------------------------------------
-*/
+// Bootstrap App
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
+// FORCE DEBUG
 $app->make('config')->set('app.debug', true);
 $app->make('config')->set('app.env', 'local');
 
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-
+// Handle request
+$app->handleRequest(Request::capture());
