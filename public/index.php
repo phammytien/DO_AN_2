@@ -17,4 +17,20 @@ require __DIR__.'/../vendor/autoload.php';
 /** @var Application $app */
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
+/*
+|--------------------------------------------------------------------------
+| FORCE DEBUG (for Render 500 error)
+|--------------------------------------------------------------------------
+| This completely bypasses .env and forces Laravel to display all errors.
+| Remove this block after fixing the error!
+*/
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+// Force Laravel debug ON
+$app->make('config')->set('app.debug', true);
+
+// Force APP_ENV = local (optional but helps)
+$app->make('config')->set('app.env', 'local');
+
 $app->handleRequest(Request::capture());
