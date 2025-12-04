@@ -1,24 +1,32 @@
-# Dockerfile
-FROM php:8.2-fpm
+FROM php:8.2-apache
 
-# Cài các extension cần thiết
+# enable rewrite
+RUN a2enmod rewrite
+
+# install dependencies
 RUN apt-get update && apt-get install -y \
-    git curl zip unzip libpng-dev libonig-dev libxml2-dev \
-    && docker-php-ext-install pdo pdo_mysql mbstring gd
+    git curl unzip zip libpng-dev libonig-dev libxml2-dev libzip-dev \
+    && docker-php-ext-install pdo pdo_mysql mbstring gd zip
 
-# Cài composer
+# install composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
+# copy project code
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader \
-    && php artisan key:generate \
+# install composer dependencies
+RUN composer install --no-dev --optimize-autoloader
+
+# generate app key & cache config/routes/views
+RUN php artisan key:generate --force \
     && php artisan config:cache \
     && php artisan route:cache \
     && php artisan view:cache
 
-EXPOSE 9000
+# fix permissions
+RUN chown -R www-data:www-data storage bootstrap/cache
 
-CMD ["php-fpm"]
+EXPOSE 80
+CMD ["apache2-foreground"]
