@@ -28,10 +28,9 @@ require __DIR__.'/../vendor/autoload.php';
 */
 $app = require_once __DIR__.'/../bootstrap/app.php';
 
-$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+$app->make('config')->set('app.debug', true);
+$app->make('config')->set('app.env', 'local');
 
-$response = $kernel->handle(
-    $request = Request::capture()
-)->send();
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
-$kernel->terminate($request, $response);
