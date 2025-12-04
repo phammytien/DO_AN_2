@@ -100,8 +100,8 @@ Route::prefix('admin')->middleware(['auth', 'role:Admin'])->name('admin.')->grou
   // ===================== ĐỀ TÀI (ĐÃ SỬA CHUẨN) =====================
 
 // AJAX load form edit
-Route::get('/detai/{id}/edit', [DeTaiController::class, 'edit'])
-    ->name('detai.edit');
+// Route::get('/detai/{id}/edit', [DeTaiController::class, 'edit'])
+//     ->name('detai.edit');
 
 // Resource CHỈ ĐĂNG KÝ 1 LẦN
 Route::resource('detai', DeTaiController::class)->except(['show']);
