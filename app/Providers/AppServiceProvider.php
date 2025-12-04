@@ -16,10 +16,13 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Register any application services.
      */
-    public function register(): void
-    {
-        //
+public function register()
+{
+    if (env('RENDER') === 'true') {
+        config(['app.debug' => true]);
     }
+}
+
 
     /**
      * Bootstrap any application services.
