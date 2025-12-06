@@ -1,26 +1,33 @@
+# Base image PHP 8.2 + Apache
 FROM php:8.2-apache
 
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    unzip git curl libpng-dev libonig-dev libxml2-dev zip libzip-dev \
+    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd
+
+# Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
-RUN apt-get update && apt-get install -y \
-    git curl zip unzip libpng-dev libonig-dev libxml2-dev libzip-dev \
-    && docker-php-ext-install pdo pdo_mysql mbstring gd zip
-
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
+# Copy application code
+COPY . /var/www/html
 WORKDIR /var/www/html
 
-COPY . .
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' \
-    /etc/apache2/sites-available/000-default.conf
+# Install Laravel dependencies
+RUN composer install --no-dev --optimize-autoloader
 
-RUN composer install --no-dev --optimize-autoloader --no-scripts
+# Fix permissions
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
+# Generate key & link storage
+RUN php artisan key:generate --force || true
 RUN php artisan storage:link || true
 
-RUN chown -R www-data:www-data storage bootstrap/cache
+# Copy start script
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
 
-EXPOSE 80
-
-CMD apache2-foreground
+CMD ["/start.sh"]
