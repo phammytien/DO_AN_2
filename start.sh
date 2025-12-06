@@ -1,13 +1,14 @@
 #!/bin/bash
 
-echo "Clearing Laravel caches..."
-php artisan config:clear
-php artisan cache:clear
-php artisan route:clear
-php artisan view:clear
+# Clear caches (just in case)
+php artisan config:clear || true
+php artisan cache:clear || true
+php artisan route:clear || true
+php artisan view:clear || true
+php artisan optimize:clear || true
 
-echo "Running migrations..."
+# Run migrations (optional)
 php artisan migrate --force || true
 
-echo "Starting Apache..."
+# Start Apache
 apache2-foreground
